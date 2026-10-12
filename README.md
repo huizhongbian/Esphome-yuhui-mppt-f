@@ -5,20 +5,17 @@ Made for mppt charginger for Yuhui or Jvyuan ,esphome base on Homeassistant syst
 [![ESPHome](https://img.shields.io/badge/ESPHome-2026.4.5-blue)](https://esphome.io)
 
 这是为钰辉/聚源 MPPT 太阳能充电控制器编写的 ESPHome 外部组件，支持读取实时数据和设置参数。
-欢迎大家TEST,ESPHome Device Builder 当前版本：2026.4.5 测试通过。
+欢迎大家TEST,ESPHome Device Builder 当前版本：2026.10.12 测试通过。
 ## 功能
 
-- 读取 PV 电压、电池电压、充电电流、充电功率、内部温度、外部温度
-- 读取设备日发电量、总发电量（kWh）
-- 控制：禁止充电开关、DC 输出开关
-- 手动设置最大充电电流（0.1A~130A，步进 0.1A）
+     功能	           说明
+✅ 实时数据监控	    发送 0xB1 命令 查询 电流限制、电压限制、PV电压、电池电压、充电电流、温度、电量等
+✅ 最大充电电流调节	number 实体，发送 0xD0 0x25 命令
+✅ 最大充电电压调节	number 实体，发送 0xD0 0x22 命令
+✅ 禁止充电开关	    发送 0xC0 0x01/0x02 命令
+✅ DC输出开关	      发送 0xC0 0x03/0x04 命令
+✅ MPPT时间同步	    按下按钮发送 0xDF 命令
   
-## 修正历史(没有tag分支，只有Main)
- v1.2, 修正mppt的功率计算错误。
- 
- v1.1, 修正重启会将充电电流清零默认；
- 
- v1.0，第一次发布，带调节电流功能；
 
 ## 接线
 
