@@ -1,0 +1,225 @@
+esphome:
+  name: yuhui-mppt120a
+  friendly_name: yuhui-mppt120a
+  comment: "钰辉MPPT控制器"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# 外部组件声明
+external_components:
+  - source: github://huizhongbian/Esphome-yuhui-mppt-f@main   # 指向本地 custom_components 父目录，或者使用绝对路径
+
+wifi:
+  ssid: tplink
+  password: 12345678
+  min_auth_mode: WPA2
+  ap:
+    ssid: "mppt"
+    password: "123456789"
+  fast_connect: true # 连接时跳过扫描过程，也减少了后台扫描的需求[reference:2]
+  power_save_mode: none             # 禁用省电模式，以保证WiFi的持续高性能[reference:3]
+
+api:
+  encryption:
+    key: zwqIirQG1HQECiFf79QxhM1J1keIZpoGGzi4Vy8kuz8=
+
+web_server:
+  port: 80
+  
+ota:
+  platform: esphome
+  password: zwqIirQG1HQECiFf79QxhM1J1keIZpoGGzi4Vy8kuz8=
+  platform: web_server   # 新增：启用网页上传
+
+logger: 
+  level: DEBUG
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO16
+  rx_pin: GPIO17
+  baud_rate: 9600
+
+yuhui_mppt:
+  address: 1
+  update_interval: 2s #更新时间2秒
+  pv_voltage_id: pv_voltage_sensor
+  battery_voltage_id: battery_voltage_sensor
+  charging_voltage_id: charging_voltage_sensor
+  charging_current_id: charging_current_sensor
+  maxcharging_current_id: maxcharging_current_sensor
+  charging_power_id: charging_power_sensor
+  internal_temperature_id: internal_temperature_sensor
+  external_temperature_id: external_temperature_sensor
+  daily_energy_id: daily_energy_sensor
+  total_energy_id: total_energy_sensor
+  disable_charge_switch_id: disable_charge_switch
+  dc_output_switch_id: dc_output_switch
+  max_current_number_id: max_current_number
+  max_voltage_number_id: max_voltage_number
+  clock_calibration_button_id: clock_calibration_button
+sensor:
+  - platform: template
+    id: pv_voltage_sensor
+    name: "Yuhui MPPT PV Voltage"
+    unit_of_measurement: "V"
+    icon: "mdi:solar-power"
+    accuracy_decimals: 2
+    device_class: voltage
+    state_class: measurement
+    
+  - platform: template
+    id: battery_voltage_sensor
+    name: "Yuhui MPPT Battery Voltage"
+    unit_of_measurement: "V"
+    icon: "mdi:battery-charging"
+    accuracy_decimals: 2
+    device_class: voltage
+    state_class: measurement
+
+  - platform: template
+    id: charging_voltage_sensor
+    name: "Yuhui MPPT Charging Voltage"
+    unit_of_measurement: "V"
+    icon: "mdi:tune"
+    accuracy_decimals: 2
+    device_class: voltage
+    state_class: measurement
+    
+  - platform: template
+    id: charging_current_sensor
+    name: "Yuhui MPPT Charging Current"
+    unit_of_measurement: "A"
+    icon: "mdi:current-dc"
+    accuracy_decimals: 2
+    device_class: current
+    state_class: measurement
+ 
+  - platform: template
+    id: maxcharging_current_sensor
+    name: "Yuhui MPPT maxCharging Current"
+    unit_of_measurement: "A"
+    icon: "mdi:tune"
+    accuracy_decimals: 2
+    device_class: current
+    state_class: measurement
+
+  - platform: template
+    id: charging_power_sensor
+    name: "Yuhui MPPT Charging Power"
+    unit_of_measurement: "W"
+    icon: "mdi:battery-charging-high"
+    accuracy_decimals: 2
+    device_class: power
+    state_class: measurement
+    
+  - platform: template
+    id: internal_temperature_sensor
+    name: "Yuhui MPPT Internal Temperature"
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    accuracy_decimals: 1
+    device_class: temperature
+    state_class: measurement
+    
+  - platform: template
+    id: external_temperature_sensor
+    name: "Yuhui MPPT External Temperature"
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    accuracy_decimals: 1
+    device_class: temperature
+    state_class: measurement
+    
+  - platform: template
+    id: daily_energy_sensor
+    name: "Yuhui MPPT Daily Energy"
+    unit_of_measurement: "kWh"
+    icon: "mdi:lightning-bolt"
+    accuracy_decimals: 2
+    device_class: energy
+    state_class: total_increasing
+    
+  - platform: template
+    id: total_energy_sensor
+    name: "Yuhui MPPT Total Energy"
+    unit_of_measurement: "kWh"
+    icon: "mdi:lightning-bolt-outline"
+    accuracy_decimals: 2
+    device_class: energy
+    state_class: total_increasing
+    
+  - platform: template
+    name: "Yuhui MPPT Yesterday Energy"
+    unit_of_measurement: "kWh"
+    icon: "mdi:lightning-bolt"
+    accuracy_decimals: 2
+    device_class: energy
+    state_class: total_increasing
+    lambda: |-
+      return id(yesterday_energy_kwh);
+    update_interval: 60s 
+ 
+switch:
+  - platform: template
+    id: disable_charge_switch
+    name: "Yuhui MPPT Disable Charging"
+    optimistic: true
+  - platform: template
+    id: dc_output_switch
+    name: "Yuhui MPPT DC Output"
+    optimistic: true
+
+button:
+  - platform: template
+    name: "Clock calibration"
+    id: clock_calibration_button
+    icon: "mdi:timer-sync-outline"
+    
+# 充电电流调节
+number:
+  - platform: template
+    name: "Max Charging Current"        # 在HA中显示的名称
+    id: max_current_number             # 在ESPHome中用于引用的ID，与代码对应
+    unit_of_measurement: "A"           # 单位
+    icon: "mdi:tune-variant"
+    mode: box                          # 'box' 模式在移动端体验更好，也可用'slider'
+    min_value: 1                    # 最小值限制0.1
+    max_value: 120                  # 最大值限制130A
+    step: 1                          # 点击+/-按钮时的增减步长
+    optimistic: true                   # 界面立即响应，无需等待设备确认
+
+  - platform: template
+    name: "Max Charging Voltage"
+    id: max_voltage_number
+    unit_of_measurement: "V"
+    icon: "mdi:tune-variant"
+    mode: box
+    min_value: 13                # 最小值限制
+    max_value: 140                  # 最大值限制
+    step: 0.1
+    optimistic: true
+    
+# 每天23点，将当前日发电量存入昨日变量
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Asia/Shanghai
+    on_time:
+      - seconds: 0
+        minutes: 0
+        hours: 23
+        then:
+          - lambda: |-
+              float daily = id(daily_energy_sensor).state;
+              id(yesterday_energy_kwh) = daily;
+              ESP_LOGD("yesterday", "Yesterday energy saved: %.2f kWh", daily);
+
+globals:
+  - id: yesterday_energy_kwh
+    type: float
+    restore_value: true
+    initial_value: "0.0"
