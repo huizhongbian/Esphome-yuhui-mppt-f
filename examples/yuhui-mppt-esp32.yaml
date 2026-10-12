@@ -13,8 +13,8 @@ external_components:
   - source: github://huizhongbian/Esphome-yuhui-mppt-f@main   # 指向本地 custom_components 父目录，或者使用绝对路径
 
 wifi:
-  ssid: tplink
-  password: 12345678
+  ssid: "tplink"
+  password: "abc123456789"
   min_auth_mode: WPA2
   ap:
     ssid: "mppt"
