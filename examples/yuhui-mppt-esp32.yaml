@@ -18,7 +18,7 @@ wifi:
   min_auth_mode: WPA2
   ap:
     ssid: "mppt"
-    password: "123456789"
+    password: "abc123456789"
   fast_connect: true # 连接时跳过扫描过程，也减少了后台扫描的需求[reference:2]
   power_save_mode: none             # 禁用省电模式，以保证WiFi的持续高性能[reference:3]
 
@@ -30,9 +30,9 @@ web_server:
   port: 80
   
 ota:
-  platform: esphome
-  password: zwqIirQG1HQECiFf79QxhM1J1keIZpoGGzi4Vy8kuz8=
-  platform: web_server   # 新增：启用网页上传
+  - platform: esphome
+    password: zwqIirQG1HQECiFf79QxhM1J1keIZpoGGzi4Vy8kuz8=
+  - platform: web_server   # 新增：启用网页上传
 
 logger: 
   level: DEBUG
