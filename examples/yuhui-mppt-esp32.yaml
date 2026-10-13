@@ -2,7 +2,7 @@ esphome:
   name: yuhui-mppt120a
   friendly_name: yuhui-mppt120a
   comment: "钰辉MPPT控制器"
-
+#这是esp32请改为你自己的开发板
 esp32:
   board: esp32dev
   framework:
@@ -58,7 +58,7 @@ yuhui_mppt:
   disable_charge_switch_id: disable_charge_switch
   dc_output_switch_id: dc_output_switch
   max_current_number_id: max_current_number
-  max_voltage_number_id: max_voltage_number
+  max_voltage_number_id: max_voltage_number        #如果你不需要调整电压，请删除这一行和下面对应的实体
   clock_calibration_button_id: clock_calibration_button
 sensor:
   - platform: template
@@ -190,7 +190,7 @@ number:
     max_value: 120                  # 最大值限制
     step: 1                          # 点击+/-按钮时的增减步长
     optimistic: true                   # 界面立即响应，无需等待设备确认
-
+#调整电压实体
   - platform: template
     name: "Max Charging Voltage"
     id: max_voltage_number
