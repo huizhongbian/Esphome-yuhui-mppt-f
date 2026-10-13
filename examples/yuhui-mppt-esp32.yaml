@@ -31,7 +31,6 @@ web_server:
   
 ota:
   - platform: esphome
-    password: zwqIirQG1HQECiFf79QxhM1J1keIZpoGGzi4Vy8kuz8=
   - platform: web_server   # 新增：启用网页上传
 
 logger: 
@@ -187,8 +186,8 @@ number:
     unit_of_measurement: "A"           # 单位
     icon: "mdi:tune-variant"
     mode: box                          # 'box' 模式在移动端体验更好，也可用'slider'
-    min_value: 1                    # 最小值限制0.1
-    max_value: 120                  # 最大值限制130A
+    min_value: 1                    # 最小值限制
+    max_value: 120                  # 最大值限制
     step: 1                          # 点击+/-按钮时的增减步长
     optimistic: true                   # 界面立即响应，无需等待设备确认
 
@@ -203,7 +202,7 @@ number:
     step: 0.1
     optimistic: true
     
-# 每天23点，将当前日发电量存入昨日变量
+# 每天23点，将当今日发电量存入昨日变量
 time:
   - platform: sntp
     id: sntp_time
