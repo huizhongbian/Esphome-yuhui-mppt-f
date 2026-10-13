@@ -79,7 +79,7 @@ void YuhuiMppt::send_control_command_(uint8_t command_code) {
   delay(100);
   while (available()) read();
 }
-  // 发送时间同步命令
+  // 发送时钟校准命令
 void YuhuiMppt::send_clock_calibration_command() {
   time_t now = time(nullptr);
   if (now < 1000000000) {
@@ -116,7 +116,7 @@ void YuhuiMppt::send_clock_calibration_command() {
   delay(100);
   while (available()) read();
 }
-  // 发送参数命令
+  // 发送参数修改命令
 void YuhuiMppt::send_parameter_command_(uint8_t param_code, uint16_t value) {
   std::vector<uint8_t> cmd;
   cmd.push_back(address_);
@@ -132,42 +132,6 @@ void YuhuiMppt::send_parameter_command_(uint8_t param_code, uint16_t value) {
   send_command_(cmd);
   delay(150);
   while (available()) read();
-}
-  // 读取参数
-bool YuhuiMppt::read_parameter_(uint8_t param_code, uint16_t &result) {
-  std::vector<uint8_t> cmd;
-  cmd.push_back(address_);
-  cmd.push_back(0xD0);
-  cmd.push_back(param_code);
-  for (int i = 0; i < 4; i++) cmd.push_back(0x00);
-  uint8_t sum = 0;
-  for (auto b : cmd) sum += b;
-  cmd.push_back(sum);
-  send_command_(cmd);
-  uint32_t start = millis();
-  std::vector<uint8_t> response;
-  while (response.size() < 8 && millis() - start < 800) {
-    while (available()) {
-      response.push_back(read());
-    }
-    delay(5);
-  }
-  if (response.size() != 8) {
-    ESP_LOGW(TAG, "Parameter read timeout, got %d bytes", response.size());
-    return false;
-  }
-  uint8_t calc = 0;
-  for (size_t i = 0; i < 7; i++) calc += response[i];
-  if (calc != response[7]) {
-    ESP_LOGW(TAG, "Parameter read checksum mismatch");
-    return false;
-  }
-  if (response[0] != address_ || response[1] != 0xD0) {
-    ESP_LOGW(TAG, "Parameter read address/command mismatch");
-    return false;
-  }
-  result = (response[5] << 8) | response[6];
-  return true;
 }
   // 最大电流值
 void YuhuiMppt::on_max_current_value(float value) {
@@ -185,7 +149,7 @@ void YuhuiMppt::on_max_voltage_value(float value) {
   send_parameter_command_(0x22, voltage_ma);
   ESP_LOGI(TAG, "Set max charging voltage to %.1fV", value);
 }
-  // 读取并解析响应
+  // 解析查询数据
 bool YuhuiMppt::read_and_parse_response_() {
   for (int retry = 0; retry < 2; retry++) {
     uint32_t start = millis();
