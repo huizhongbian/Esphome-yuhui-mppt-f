@@ -16,13 +16,13 @@ void YuhuiMppt::setup() {
     disable_charge_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x01 : 0x02);
     });
-    disable_charge_switch_->publish_state(true);      // true开false关
+    disable_charge_switch_->publish_state(true);
   }
   if (dc_output_switch_) {
     dc_output_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x03 : 0x04);
     });
-    dc_output_switch_->publish_state(true);      // true开false关
+    dc_output_switch_->publish_state(true);
   }
   // 初始化Button
   if (clock_calibration_button_) {
@@ -33,16 +33,12 @@ void YuhuiMppt::setup() {
   // 初始化NUMBER
   if (max_current_number_) {
     max_current_number_->add_on_state_callback([this](float value) {
-      if (!skip_number_callback_) {
         this->on_max_current_value(value);
-      }
     });
   }
   if (max_voltage_number_) {
     max_voltage_number_->add_on_state_callback([this](float value) {
-      if (!skip_number_callback_) {
         this->on_max_voltage_value(value);
-      }
     });
   }
 
