@@ -10,10 +10,12 @@ yuhui_mppt_ns = cg.esphome_ns.namespace("yuhui_mppt")
 YuhuiMppt = yuhui_mppt_ns.class_("YuhuiMppt", cg.PollingComponent, uart.UARTDevice)
 
 # 传感器
+CONF_RATED_VOLTAGE_ID = "rated_voltage_id"
 CONF_CHARGING_VOLTAGE_ID = "charging_voltage_id"
 CONF_PV_VOLTAGE_ID = "pv_voltage_id"
 CONF_BATTERY_VOLTAGE_ID = "battery_voltage_id"
 CONF_CHARGING_CURRENT_ID = "charging_current_id"
+CONF_RATED_CURRENT_ID = "rated_current_id"
 CONF_MAXCHARGING_CURRENT_ID = "maxcharging_current_id"
 CONF_CHARGING_POWER_ID = "charging_power_id"
 CONF_INTERNAL_TEMPERATURE_ID = "internal_temperature_id"
@@ -37,10 +39,12 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_ADDRESS, default=1): cv.uint8_t,
     cv.Optional(CONF_UPDATE_INTERVAL, default="5s"): cv.update_interval,
     # 传感器
+    cv.Optional(CONF_RATED_VOLTAGE_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_CHARGING_VOLTAGE_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_PV_VOLTAGE_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_BATTERY_VOLTAGE_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_CHARGING_CURRENT_ID): cv.use_id(sensor.Sensor),
+    cv.Optional(CONF_RATED_CURRENT_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_MAXCHARGING_CURRENT_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_CHARGING_POWER_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_INTERNAL_TEMPERATURE_ID): cv.use_id(sensor.Sensor),
@@ -65,6 +69,9 @@ async def to_code(config):
     cg.add(var.set_address(config[CONF_ADDRESS]))
 
     # 传感器映射
+    if CONF_RATED_VOLTAGE_ID in config:
+        sens = await cg.get_variable(config[CONF_RATED_VOLTAGE_ID])
+        cg.add(var.set_rated_voltage_sensor(sens))
     if CONF_CHARGING_VOLTAGE_ID in config:
         sens = await cg.get_variable(config[CONF_CHARGING_VOLTAGE_ID])
         cg.add(var.set_charging_voltage_sensor(sens))
@@ -77,6 +84,9 @@ async def to_code(config):
     if CONF_CHARGING_CURRENT_ID in config:
         sens = await cg.get_variable(config[CONF_CHARGING_CURRENT_ID])
         cg.add(var.set_charging_current_sensor(sens))
+    if CONF_RATED_CURRENT_ID in config:
+        sens = await cg.get_variable(config[CONF_RATED_CURRENT_ID])
+        cg.add(var.set_rated_current_sensor(sens))
     if CONF_MAXCHARGING_CURRENT_ID in config:
         sens = await cg.get_variable(config[CONF_MAXCHARGING_CURRENT_ID])
         cg.add(var.set_maxcharging_current_sensor(sens))

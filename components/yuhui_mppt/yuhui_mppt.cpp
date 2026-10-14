@@ -16,13 +16,13 @@ void YuhuiMppt::setup() {
     disable_charge_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x01 : 0x02);
     });
-    disable_charge_switch_->publish_state(true);
+    disable_charge_switch_->publish_state(true);      // true开false关
   }
   if (dc_output_switch_) {
     dc_output_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x03 : 0x04);
     });
-    dc_output_switch_->publish_state(true);
+    dc_output_switch_->publish_state(true);      // true开false关
   }
   // 初始化Button
   if (clock_calibration_button_) {
@@ -129,6 +129,7 @@ void YuhuiMppt::send_parameter_command_(uint8_t param_code, uint16_t value) {
   delay(150);
   while (available()) read();
 }
+
   // 最大电流值
 void YuhuiMppt::on_max_current_value(float value) {
   if (value < 0.1f) value = 0.1f;
@@ -186,12 +187,19 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
     ESP_LOGW(TAG, "Parse frame too short (%d bytes)", data.size());
     return false;
   }
+  
+  uint16_t raw_rv = (data[16] << 8) | data[17];
+  float rated_voltage = raw_rv / 100.0f;
+  
   uint16_t raw_fcv = (data[20] << 8) | data[21];
   float charging_voltage = raw_fcv / 100.0f;
   
+  uint16_t raw_rcur = (data[24] << 8) | data[25];
+  float rated_current = raw_rcur / 100.0f;
+  
   uint16_t raw_max_cur = (data[26] << 8) | data[27];
   float maxcharging_current = raw_max_cur / 100.0f;
-
+  
   uint16_t raw_pv = (data[30] << 8) | data[31];
   float pv_voltage = raw_pv / 10.0f;
 
@@ -215,10 +223,12 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
 
   float charging_power = battery_voltage * charging_current;
 
+  if (rated_voltage_sensor_) rated_voltage_sensor_->publish_state(rated_voltage);
   if (charging_voltage_sensor_) charging_voltage_sensor_->publish_state(charging_voltage);
   if (pv_voltage_sensor_) pv_voltage_sensor_->publish_state(pv_voltage);
   if (battery_voltage_sensor_) battery_voltage_sensor_->publish_state(battery_voltage);
   if (charging_current_sensor_) charging_current_sensor_->publish_state(charging_current);
+  if (rated_current_sensor_) rated_current_sensor_->publish_state(rated_current);
   if (maxcharging_current_sensor_) maxcharging_current_sensor_->publish_state(maxcharging_current);
   if (charging_power_sensor_) charging_power_sensor_->publish_state(charging_power);
   if (internal_temperature_sensor_) internal_temperature_sensor_->publish_state(internal_temp);
@@ -226,8 +236,8 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
   if (daily_energy_sensor_) daily_energy_sensor_->publish_state(daily_energy_kwh);
   if (total_energy_sensor_) total_energy_sensor_->publish_state(total_energy_kwh);
 
-  ESP_LOGI(TAG, "Data: Fcv=%.2fV PV=%.1fV Bat=%.2fV Cur=%.2fA MCur=%.2fA Pow=%.1fW IntT=%.1f°C ExtT=%.1f°C Daily=%.2fkWh Total=%.2fkWh",
-           charging_voltage, pv_voltage, battery_voltage, charging_current,maxcharging_current, charging_power,
+  ESP_LOGI(TAG, "Data: Rv=%.2fV Fcv=%.2fV PV=%.1fV Bat=%.2fV Cur=%.2fA Rcur=%.2fA MCur=%.2fA Pow=%.1fW IntT=%.1f°C ExtT=%.1f°C Daily=%.2fkWh Total=%.2fkWh",
+           rated_voltage, charging_voltage, pv_voltage, battery_voltage, charging_current, rated_current, maxcharging_current, charging_power,
            internal_temp, external_temp, daily_energy_kwh, total_energy_kwh);
   return true;
 }
