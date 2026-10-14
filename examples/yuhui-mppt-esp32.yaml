@@ -46,9 +46,11 @@ yuhui_mppt:
   address: 1
   update_interval: 2s #更新时间2秒
   pv_voltage_id: pv_voltage_sensor
+  rated_voltage_id: rated_voltage_sensor
   battery_voltage_id: battery_voltage_sensor
   charging_voltage_id: charging_voltage_sensor
   charging_current_id: charging_current_sensor
+  rated_current_id: rated_current_sensor
   maxcharging_current_id: maxcharging_current_sensor
   charging_power_id: charging_power_sensor
   internal_temperature_id: internal_temperature_sensor
@@ -69,6 +71,15 @@ sensor:
     accuracy_decimals: 2
     device_class: voltage
     state_class: measurement
+
+  - platform: template
+    id: rated_voltage_sensor
+    name: "Yuhui MPPT rated Voltage"
+    unit_of_measurement: "V"
+    icon: "mdi:battery"
+    accuracy_decimals: 2
+    device_class: voltage
+    state_class: measurement
     
   - platform: template
     id: battery_voltage_sensor
@@ -86,6 +97,15 @@ sensor:
     icon: "mdi:tune"
     accuracy_decimals: 2
     device_class: voltage
+    state_class: measurement
+
+  - platform: template
+    id: rated_current_sensor
+    name: "Yuhui MPPT rated Current"
+    unit_of_measurement: "A"
+    icon: "mdi:tune"
+    accuracy_decimals: 2
+    device_class: current
     state_class: measurement
     
   - platform: template
