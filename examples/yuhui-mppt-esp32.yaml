@@ -2,6 +2,9 @@ esphome:
   name: yuhui-mppt120a
   friendly_name: yuhui-mppt120a
   comment: "钰辉MPPT控制器"
+  on_boot:
+    - then:
+        - button.press: clock_calibration_button    #启动时同步时间
 #这是esp32请改为你自己的开发板
 esp32:
   board: esp32dev
@@ -185,7 +188,7 @@ sensor:
 switch:
   - platform: template
     id: disable_charge_switch
-    name: "Yuhui MPPT Disable Charging"
+    name: "Yuhui MPPT Charging switch"
     optimistic: true
   - platform: template
     id: dc_output_switch
