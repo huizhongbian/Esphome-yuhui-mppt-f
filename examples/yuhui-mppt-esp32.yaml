@@ -9,7 +9,10 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    type: esp-idf
+    advanced:
+      sram1_as_iram: true
+      flash_chip: generic
 
 # 外部组件声明
 external_components:
@@ -47,7 +50,7 @@ uart:
 
 yuhui_mppt:
   address: 1
-  update_interval: 2s #更新时间2秒
+  update_interval: 5s #更新时间2秒
   pv_voltage_id: pv_voltage_sensor
   rated_voltage_id: rated_voltage_sensor
   battery_voltage_id: battery_voltage_sensor
@@ -97,7 +100,7 @@ sensor:
     id: charging_voltage_sensor
     name: "Yuhui MPPT Charging Voltage"
     unit_of_measurement: "V"
-    icon: "mdi:tune"
+    icon: "mdi:ray-vertex"
     accuracy_decimals: 2
     device_class: voltage
     state_class: measurement
@@ -106,7 +109,7 @@ sensor:
     id: rated_current_sensor
     name: "Yuhui MPPT rated Current"
     unit_of_measurement: "A"
-    icon: "mdi:tune"
+    icon: "mdi:current-dc"
     accuracy_decimals: 2
     device_class: current
     state_class: measurement
@@ -124,7 +127,7 @@ sensor:
     id: maxcharging_current_sensor
     name: "Yuhui MPPT maxCharging Current"
     unit_of_measurement: "A"
-    icon: "mdi:tune"
+    icon: "mdi:ray-vertex"
     accuracy_decimals: 2
     device_class: current
     state_class: measurement
