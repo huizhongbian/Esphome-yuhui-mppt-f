@@ -11,18 +11,16 @@ static const char *const TAG = "yuhui_mppt";
 void YuhuiMppt::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Yuhui MPPT...");
   while (available()) read();
-  // 初始化开关状态
-  if (disable_charge_switch_) {
-    disable_charge_switch_->add_on_state_callback([this](bool state) {
+  // 初始化开关
+  if (charge_switch_) {
+    charge_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x01 : 0x02);
     });
-    disable_charge_switch_->publish_state(true);      // true开false关
   }
   if (dc_output_switch_) {
     dc_output_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x03 : 0x04);
     });
-    dc_output_switch_->publish_state(true);      // true开false关
   }
   // 初始化Button
   if (clock_calibration_button_) {
@@ -41,9 +39,13 @@ void YuhuiMppt::setup() {
         this->on_max_voltage_value(value);
     });
   }
-
 }
-  // 发送 0xB1 命令查询数据
+   // 发送命令
+void YuhuiMppt::send_command_(const std::vector<uint8_t> &data) {
+  write_array(data.data(), data.size());
+  flush();
+}
+ // 发送 0xB1 命令查询数据
 void YuhuiMppt::update() {
   std::vector<uint8_t> command;
   command.push_back(address_);
@@ -55,11 +57,6 @@ void YuhuiMppt::update() {
   command.push_back(sum);
   send_command_(command);
   read_and_parse_response_();
-}
-
-void YuhuiMppt::send_command_(const std::vector<uint8_t> &data) {
-  write_array(data.data(), data.size());
-  flush();
 }
   // 发送控制命令
 void YuhuiMppt::send_control_command_(uint8_t command_code) {
@@ -137,6 +134,7 @@ void YuhuiMppt::on_max_current_value(float value) {
   uint16_t current_ma = (uint16_t)(value * 100);
   send_parameter_command_(0x25, current_ma);
   ESP_LOGI(TAG, "Set max charging current to %.1fA", value);
+  delay(100);
 }
   // 浮充电压
 void YuhuiMppt::on_max_voltage_value(float value) {
@@ -145,6 +143,7 @@ void YuhuiMppt::on_max_voltage_value(float value) {
   uint16_t voltage_ma = (uint16_t)(value * 100);
   send_parameter_command_(0x22, voltage_ma);
   ESP_LOGI(TAG, "Set max charging voltage to %.1fV", value);
+  delay(100);
 }
   // 解析查询数据
 bool YuhuiMppt::read_and_parse_response_() {
@@ -187,7 +186,9 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
     ESP_LOGW(TAG, "Parse frame too short (%d bytes)", data.size());
     return false;
   }
-  
+  uint8_t status = data[3];
+  uint8_t charging_status_value = data[4];
+  uint8_t control_status = data[5];
   uint16_t raw_rv = (data[16] << 8) | data[17];
   float rated_voltage = raw_rv / 100.0f;
   
@@ -222,19 +223,26 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
   float total_energy_kwh = raw_total / 1000.0f;
 
   float charging_power = battery_voltage * charging_current;
+  
+  bool charging_status = charging_status_value & 0x01;
+  bool load_output = control_status & 0x02;
 
   if (rated_voltage_sensor_) rated_voltage_sensor_->publish_state(rated_voltage);
   if (charging_voltage_sensor_) charging_voltage_sensor_->publish_state(charging_voltage);
+  if (max_voltage_number_) max_voltage_number_->publish_state(charging_voltage);
   if (pv_voltage_sensor_) pv_voltage_sensor_->publish_state(pv_voltage);
   if (battery_voltage_sensor_) battery_voltage_sensor_->publish_state(battery_voltage);
   if (charging_current_sensor_) charging_current_sensor_->publish_state(charging_current);
   if (rated_current_sensor_) rated_current_sensor_->publish_state(rated_current);
   if (maxcharging_current_sensor_) maxcharging_current_sensor_->publish_state(maxcharging_current);
+  if (max_current_number_) max_current_number_->publish_state(maxcharging_current);
   if (charging_power_sensor_) charging_power_sensor_->publish_state(charging_power);
   if (internal_temperature_sensor_) internal_temperature_sensor_->publish_state(internal_temp);
   if (external_temperature_sensor_) external_temperature_sensor_->publish_state(external_temp);
   if (daily_energy_sensor_) daily_energy_sensor_->publish_state(daily_energy_kwh);
   if (total_energy_sensor_) total_energy_sensor_->publish_state(total_energy_kwh);
+  if (charge_switch_) charge_switch_->publish_state(charging_status);
+  if (dc_output_switch_) dc_output_switch_->publish_state(load_output);
 
   ESP_LOGI(TAG, "Data: Rv=%.2fV Fcv=%.2fV PV=%.1fV Bat=%.2fV Cur=%.2fA Rcur=%.2fA MCur=%.2fA Pow=%.1fW IntT=%.1f°C ExtT=%.1f°C Daily=%.2fkWh Total=%.2fkWh",
            rated_voltage, charging_voltage, pv_voltage, battery_voltage, charging_current, rated_current, maxcharging_current, charging_power,

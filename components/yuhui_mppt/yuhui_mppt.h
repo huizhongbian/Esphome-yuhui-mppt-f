@@ -29,7 +29,7 @@ class YuhuiMppt : public PollingComponent, public uart::UARTDevice {
   void set_total_energy_sensor(sensor::Sensor *s) { total_energy_sensor_ = s; }
 
   // 开关
-  void set_disable_charge_switch(switch_::Switch *s) { disable_charge_switch_ = s; }
+  void set_charge_switch(switch_::Switch *s) { charge_switch_ = s; }
   void set_dc_output_switch(switch_::Switch *s) { dc_output_switch_ = s; }
 
   // Number 实体
@@ -59,7 +59,7 @@ class YuhuiMppt : public PollingComponent, public uart::UARTDevice {
   sensor::Sensor *daily_energy_sensor_{nullptr};
   sensor::Sensor *total_energy_sensor_{nullptr};
   // 开关
-  switch_::Switch *disable_charge_switch_{nullptr};
+  switch_::Switch *charge_switch_{nullptr};
   switch_::Switch *dc_output_switch_{nullptr};
   // Number 实体
   number::Number *max_current_number_{nullptr};

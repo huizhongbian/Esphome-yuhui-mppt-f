@@ -24,7 +24,7 @@ CONF_DAILY_ENERGY_ID = "daily_energy_id"
 CONF_TOTAL_ENERGY_ID = "total_energy_id"
 
 # 开关
-CONF_DISABLE_CHARGE_SWITCH_ID = "disable_charge_switch_id"
+CONF_CHARGE_SWITCH_ID = "charge_switch_id"
 CONF_DC_OUTPUT_SWITCH_ID = "dc_output_switch_id"
 
 # Number
@@ -52,7 +52,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_DAILY_ENERGY_ID): cv.use_id(sensor.Sensor),
     cv.Optional(CONF_TOTAL_ENERGY_ID): cv.use_id(sensor.Sensor),
     # 开关
-    cv.Optional(CONF_DISABLE_CHARGE_SWITCH_ID): cv.use_id(switch.Switch),
+    cv.Optional(CONF_CHARGE_SWITCH_ID): cv.use_id(switch.Switch),
     cv.Optional(CONF_DC_OUTPUT_SWITCH_ID): cv.use_id(switch.Switch),
     # Number
     cv.Optional(CONF_MAX_CURRENT_NUMBER_ID): cv.use_id(number.Number),
@@ -107,9 +107,9 @@ async def to_code(config):
         cg.add(var.set_total_energy_sensor(sens))
 
     # 开关映射
-    if CONF_DISABLE_CHARGE_SWITCH_ID in config:
-        sw = await cg.get_variable(config[CONF_DISABLE_CHARGE_SWITCH_ID])
-        cg.add(var.set_disable_charge_switch(sw))
+    if CONF_CHARGE_SWITCH_ID in config:
+        sw = await cg.get_variable(config[CONF_CHARGE_SWITCH_ID])
+        cg.add(var.set_charge_switch(sw))
     if CONF_DC_OUTPUT_SWITCH_ID in config:
         sw = await cg.get_variable(config[CONF_DC_OUTPUT_SWITCH_ID])
         cg.add(var.set_dc_output_switch(sw))
