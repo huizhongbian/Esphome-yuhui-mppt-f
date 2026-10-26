@@ -16,7 +16,8 @@ Made for mppt charginger for Yuhui or Jvyuan ,esphome base on Homeassistant syst
 
 ✅ MPPT时间同步---按下按钮发送 0xDF 命令
   
-<img width="398" height="1103" alt="yuhuimppt" src="https://github.com/user-attachments/assets/984b63e4-bba8-4f49-8856-3b06d673c2f5" />
+<img width="423" height="1197" alt="2026-10-26 132020" src="https://github.com/user-attachments/assets/470171c8-8fa5-44e0-82cb-ab704b0db30b" />
+
 
 
 | ESP32 | RS485转TTL模块 | MPPT 端子 |
