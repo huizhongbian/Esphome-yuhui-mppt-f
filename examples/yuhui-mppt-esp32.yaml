@@ -50,7 +50,7 @@ uart:
 
 yuhui_mppt:
   address: 1
-  update_interval: 5s #更新时间2秒
+  update_interval: 5s #更新间隔2秒
   pv_voltage_id: pv_voltage_sensor
   rated_voltage_id: rated_voltage_sensor
   battery_voltage_id: battery_voltage_sensor
@@ -104,6 +104,15 @@ sensor:
     accuracy_decimals: 2
     device_class: voltage
     state_class: measurement
+    
+  - platform: template
+    id: charging_current_sensor
+    name: "Yuhui MPPT Charging Current"
+    unit_of_measurement: "A"
+    icon: "mdi:current-dc"
+    accuracy_decimals: 2
+    device_class: current
+    state_class: measurement
 
   - platform: template
     id: rated_current_sensor
@@ -114,15 +123,6 @@ sensor:
     device_class: current
     state_class: measurement
     
-  - platform: template
-    id: charging_current_sensor
-    name: "Yuhui MPPT Charging Current"
-    unit_of_measurement: "A"
-    icon: "mdi:current-dc"
-    accuracy_decimals: 2
-    device_class: current
-    state_class: measurement
- 
   - platform: template
     id: maxcharging_current_sensor
     name: "Yuhui MPPT maxCharging Current"
@@ -190,7 +190,7 @@ sensor:
  
 switch:
   - platform: template
-    id: disable_charge_switch
+    id: charge_switch
     name: "Yuhui MPPT Charging switch"
     optimistic: true
   - platform: template
@@ -204,7 +204,6 @@ button:
     id: clock_calibration_button
     icon: "mdi:timer-sync-outline"
     
-# 充电电流调节
 number:
   - platform: template
     name: "Max Charging Current"        # 在HA中显示的名称
@@ -212,23 +211,23 @@ number:
     unit_of_measurement: "A"           # 单位
     icon: "mdi:tune-variant"
     mode: box                          # 'box' 模式在移动端体验更好，也可用'slider'
-    min_value: 1                    # 最小值限制
-    max_value: 120                  # 最大值限制
+    min_value: 1                    # 最小值限制0.1
+    max_value: 120                  # 最大值限制130A
     step: 1                          # 点击+/-按钮时的增减步长
     optimistic: true                   # 界面立即响应，无需等待设备确认
-#调整电压实体
+#电压设置
   - platform: template
     name: "Max Charging Voltage"
     id: max_voltage_number
     unit_of_measurement: "V"
     icon: "mdi:tune-variant"
     mode: box
-    min_value: 13                # 最小值限制
-    max_value: 140                  # 最大值限制
+    min_value: 27                # 最小值限制
+    max_value: 88                  # 最大值限制
     step: 0.1
     optimistic: true
     
-# 每天23点，将当今日发电量存入昨日变量
+# 每天21点，将当前日发电量存入昨日变量
 time:
   - platform: sntp
     id: sntp_time
@@ -238,7 +237,7 @@ time:
         minutes: 0
         hours: 23
         then:
-          - lambda: |-
+          - lambda: |
               float daily = id(daily_energy_sensor).state;
               id(yesterday_energy_kwh) = daily;
               ESP_LOGD("yesterday", "Yesterday energy saved: %.2f kWh", daily);
