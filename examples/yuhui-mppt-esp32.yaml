@@ -63,7 +63,7 @@ yuhui_mppt:
   external_temperature_id: external_temperature_sensor
   daily_energy_id: daily_energy_sensor
   total_energy_id: total_energy_sensor
-  disable_charge_switch_id: disable_charge_switch
+  charge_switch_id: charge_switch
   dc_output_switch_id: dc_output_switch
   max_current_number_id: max_current_number
   max_voltage_number_id: max_voltage_number        #如果你不需要调整电压，请删除这一行和下面对应的实体
