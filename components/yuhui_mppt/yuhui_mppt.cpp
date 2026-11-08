@@ -16,6 +16,7 @@ void YuhuiMppt::setup() {
     charge_switch_->add_on_state_callback([this](bool state) {
       this->send_control_command_(state ? 0x01 : 0x02);
     });
+    charge_switch_->publish_state(true);
   }
   if (dc_output_switch_) {
     dc_output_switch_->add_on_state_callback([this](bool state) {
@@ -241,7 +242,7 @@ bool YuhuiMppt::parse_frame_(const std::vector<uint8_t> &data) {
   if (external_temperature_sensor_) external_temperature_sensor_->publish_state(external_temp);
   if (daily_energy_sensor_) daily_energy_sensor_->publish_state(daily_energy_kwh);
   if (total_energy_sensor_) total_energy_sensor_->publish_state(total_energy_kwh);
-  if (charge_switch_) charge_switch_->publish_state(charging_status);
+  
   if (dc_output_switch_) dc_output_switch_->publish_state(load_output);
 
   ESP_LOGI(TAG, "Data: Rv=%.2fV Fcv=%.2fV PV=%.1fV Bat=%.2fV Cur=%.2fA Rcur=%.2fA MCur=%.2fA Pow=%.1fW IntT=%.1f°C ExtT=%.1f°C Daily=%.2fkWh Total=%.2fkWh",
